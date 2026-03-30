@@ -37,15 +37,7 @@ A modern web browser (e.g., Chrome, Firefox, Edge, Safari). No Node.js, npm, or 
 *   **Recording Pass-through Money:** If you receive money meant immediately for someone else, check the "Pass-through" box. The transaction will appear in your history but will not artificially inflate your income or expense totals.
 *   **Deleting Records:** Click the 'x' button next to any transaction in the history list to remove it and instantly recalculate the dashboard.
 
-## 4. Project Structure & Work Division
-
-The project was structured to ensure clear separation of concerns among a three-person team:
-
-*   **Student 1 (UI/UX & Layout):** Responsible for semantic HTML structuring (`index.html`) and responsive CSS design (`style.css`), ensuring cross-device compatibility.
-*   **Student 2 (Storage Architecture & Core Logic):** Engineered the `NoSQL_DB` module in `app.js`, handling CRUD operations, balance calculations, and the pass-through feature logic.
-*   **Student 3 (Visualization & Advanced Features):** Implemented the `Chart.js` integration, the shared expense (split) division logic, and dynamic DOM updates for transaction history.
-
-## 5. Further Implementation Ideas
+## 4. Further Implementation Ideas
 
 While the current scope fulfills the requirements of a robust client-side tracker, future iterations could explore:
 *   **PWA Integration:** Convert the application into a Progressive Web App (PWA) with service workers for full offline capabilities and installation on mobile devices.
