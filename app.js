@@ -4,6 +4,8 @@
  * In Viva, explain: "We used a simulated NoSQL approach for data persistence, 
  * treating each transaction as a document in a JSON collection."
  */
+const CREDIT_LIMIT = 50000;
+
 const NoSQL_DB = {
     COLLECTION: "transactions",
 
@@ -40,6 +42,10 @@ const passthroughInput = document.getElementById("passthrough");
 const sharedInput = document.getElementById("shared");
 const peopleCountInput = document.getElementById("peopleCount");
 const sharedNamesInput = document.getElementById("sharedNames");
+const groupTypeInput = document.getElementById("groupType");
+const descriptionInput = document.getElementById("description");
+const lentToInput = document.getElementById("lentTo");
+const lendingGroup = document.getElementById("lending-group");
 const sharedGroup = document.getElementById("shared-input-group");
 const addBtn = document.getElementById("addBtn");
 
@@ -50,6 +56,10 @@ dateInput.valueAsDate = new Date();
 
 function toggleSharedInput() {
     sharedGroup.style.display = sharedInput.checked ? "block" : "none";
+}
+
+function toggleLendingInput() {
+    lendingGroup.style.display = categoryInput.value === "Lending" ? "block" : "none";
 }
 
 /**
@@ -65,6 +75,9 @@ function addTransaction() {
     const isShared = sharedInput.checked;
     const peopleCount = parseInt(peopleCountInput.value) || 2;
     const names = sharedNamesInput.value.trim();
+    const groupType = groupTypeInput.value;
+    const description = descriptionInput.value.trim();
+    const lentTo = lentToInput ? lentToInput.value.trim() : "";
 
     if (isNaN(amount) || amount <= 0) return alert("Enter valid amount");
     if (!date) return alert("Select a date");
@@ -81,6 +94,9 @@ function addTransaction() {
         category,
         mode,
         date,
+        description,
+        lentTo,
+        groupType: isShared ? groupType : "",
         isPassthrough,
         isShared,
         peopleCount: isShared ? peopleCount : 1,
@@ -97,10 +113,14 @@ function addTransaction() {
 
 function resetForm() {
     amountInput.value = "";
+    descriptionInput.value = "";
+    if (lentToInput) lentToInput.value = "";
     passthroughInput.checked = false;
     sharedInput.checked = false;
     sharedNamesInput.value = "";
     toggleSharedInput();
+    categoryInput.value = "Food"; // Optional reset to default
+    toggleLendingInput();
     dateInput.valueAsDate = new Date();
 }
 
@@ -117,6 +137,7 @@ function updateUI() {
     listEl.innerHTML = "";
     let income = 0;
     let expense = 0;
+    let creditUsed = 0;
 
     transactions.forEach(t => {
         const li = document.createElement("li");
@@ -124,13 +145,20 @@ function updateUI() {
         if (t.isPassthrough) li.classList.add("passthrough-item");
 
         let label = t.category;
+        if (t.category === "Lending" && t.lentTo) {
+            label += ` → ${t.lentTo}`;
+        }
+        if (t.description) label += ` - ${t.description}`;
         if (t.isPassthrough) label += " (Pass-through)";
         
         // Dynamic Label for Shared Expense
         let splitDetail = "";
         if (t.isShared) {
             label += ` (Split with ${t.peopleCount})`;
-            splitDetail = `<span class="item-sub">Shared with: ${t.sharedWith || "Group"}</span>`;
+            splitDetail = `<span class="item-sub">
+                Group: ${t.groupType || "Others"} <br>
+                Shared with: ${t.sharedWith || "Group"}
+            </span>`;
         }
 
         li.innerHTML = `
@@ -151,8 +179,16 @@ function updateUI() {
         if (!t.isPassthrough) {
             if (t.type === "income") income += t.amount;
             else expense += t.amount;
+            
+            if (t.mode === "Credit Card" && t.type === "expense") {
+                creditUsed += t.amount;
+            }
         }
     });
+
+    if (creditUsed > CREDIT_LIMIT) {
+        alert("⚠️ Credit limit exceeded!");
+    }
 
     balanceEl.innerText = (income - expense).toLocaleString();
     incomeEl.innerText = income.toLocaleString();
