@@ -50,6 +50,7 @@ const sharedGroup = document.getElementById("shared-input-group");
 const addBtn = document.getElementById("addBtn");
 
 let myChart = null;
+let creditAlertShown = false;
 
 // Initialize
 dateInput.valueAsDate = new Date();
@@ -60,6 +61,17 @@ function toggleSharedInput() {
 
 function toggleLendingInput() {
     lendingGroup.style.display = categoryInput.value === "Lending" ? "block" : "none";
+}
+
+// Modal Logic
+const modalOverlay = document.getElementById("transaction-modal");
+
+function openModal() {
+    if (modalOverlay) modalOverlay.style.display = "flex";
+}
+
+function closeModal() {
+    if (modalOverlay) modalOverlay.style.display = "none";
 }
 
 /**
@@ -82,8 +94,12 @@ function addTransaction() {
     if (isNaN(amount) || amount <= 0) return alert("Enter valid amount");
     if (!date) return alert("Select a date");
 
+    if (isShared && peopleCount < 2) {
+        return alert("Shared expense must have at least 2 people");
+    }
+
     // Logic for Mini Splitwise: Divide amount by people
-    const userShare = isShared ? (amount / peopleCount) : amount;
+    const userShare = isShared && peopleCount > 0 ? (amount / peopleCount) : amount;
 
     // Create a "Document" for our NoSQL store
     const transaction = {
@@ -109,6 +125,7 @@ function addTransaction() {
     // UI Reset
     resetForm();
     updateUI();
+    closeModal();
 }
 
 function resetForm() {
@@ -186,8 +203,9 @@ function updateUI() {
         }
     });
 
-    if (creditUsed > CREDIT_LIMIT) {
+    if (creditUsed > CREDIT_LIMIT && !creditAlertShown) {
         alert("⚠️ Credit limit exceeded!");
+        creditAlertShown = true;
     }
 
     balanceEl.innerText = (income - expense).toLocaleString();
@@ -210,6 +228,8 @@ function renderChart(transactions) {
     const data = Object.values(categoryTotals);
     const ctx = document.getElementById("chart");
     const wrapper = document.querySelector(".chart-wrapper");
+
+    if (!wrapper) return;
 
     if (myChart) myChart.destroy();
 
