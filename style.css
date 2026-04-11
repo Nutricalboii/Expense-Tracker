@@ -255,6 +255,21 @@ li.passthrough-item { opacity: 0.6; border-left-style: dashed; }
 }
 .delete-btn:hover { background: var(--danger); color: white; }
 
+.edit-btn {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.edit-btn:hover { background: var(--primary); color: white; }
+
 /* Modal and Forms */
 .modal-overlay {
     position: fixed;

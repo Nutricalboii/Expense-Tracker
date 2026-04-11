@@ -21,6 +21,16 @@ const NoSQL_DB = {
         return JSON.parse(localStorage.getItem(this.COLLECTION)) || [];
     },
 
+    // Update (Modify document by ID)
+    update: function(id, newData) {
+        let docs = this.getAll();
+        const index = docs.findIndex(doc => doc.id === id);
+        if (index !== -1) {
+            docs[index] = { ...docs[index], ...newData, id: id }; // Ensure ID stays intact
+            localStorage.setItem(this.COLLECTION, JSON.stringify(docs));
+        }
+    },
+
     // Delete (Remove document by ID)
     delete: function(id) {
         const docs = this.getAll().filter(doc => doc.id !== id);
@@ -51,6 +61,7 @@ const addBtn = document.getElementById("addBtn");
 
 let myChart = null;
 let creditAlertShown = false;
+let editingTransactionId = null;
 
 // Initialize
 dateInput.valueAsDate = new Date();
@@ -103,7 +114,7 @@ function addTransaction() {
 
     // Create a "Document" for our NoSQL store
     const transaction = {
-        id: Date.now(),
+        id: editingTransactionId || Date.now(),
         originalAmount: amount,
         amount: userShare,
         type,
@@ -119,8 +130,12 @@ function addTransaction() {
         sharedWith: isShared ? names : ""
     };
 
-    // NoSQL Insert
-    NoSQL_DB.insert(transaction);
+    // NoSQL Insert or Update
+    if (editingTransactionId) {
+        NoSQL_DB.update(editingTransactionId, transaction);
+    } else {
+        NoSQL_DB.insert(transaction);
+    }
     
     // UI Reset
     resetForm();
@@ -129,6 +144,7 @@ function addTransaction() {
 }
 
 function resetForm() {
+    editingTransactionId = null;
     amountInput.value = "";
     descriptionInput.value = "";
     if (lentToInput) lentToInput.value = "";
@@ -139,6 +155,39 @@ function resetForm() {
     categoryInput.value = "Food"; // Optional reset to default
     toggleLendingInput();
     dateInput.valueAsDate = new Date();
+}
+
+function editTransaction(id) {
+    const docs = NoSQL_DB.getAll();
+    const t = docs.find(doc => doc.id === id);
+    if (!t) return;
+
+    editingTransactionId = id;
+    
+    amountInput.value = t.originalAmount;
+    typeInput.value = t.type;
+    categoryInput.value = t.category;
+    modeInput.value = t.mode;
+    dateInput.value = t.date;
+    descriptionInput.value = t.description || "";
+    
+    if (lentToInput) {
+        lentToInput.value = t.lentTo || "";
+    }
+    
+    passthroughInput.checked = t.isPassthrough || false;
+    
+    sharedInput.checked = t.isShared || false;
+    if (t.isShared) {
+        peopleCountInput.value = t.peopleCount;
+        groupTypeInput.value = t.groupType || "Others";
+        sharedNamesInput.value = t.sharedWith || "";
+    }
+    
+    toggleSharedInput();
+    toggleLendingInput();
+    
+    openModal();
 }
 
 function deleteTransaction(id) {
@@ -185,9 +234,10 @@ function updateUI() {
                 ${splitDetail}
                 ${t.isShared ? `<span class="item-sub">Total Bill: ₹${t.originalAmount.toLocaleString()}</span>` : ""}
             </div>
-            <div style="display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="item-amount">${t.type === "income" ? "+" : "-"} ₹${t.amount.toLocaleString()}</span>
-                <button class="delete-btn" onclick="deleteTransaction(${t.id})">&times;</button>
+                <button class="edit-btn" onclick="editTransaction(${t.id})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                <button class="delete-btn" onclick="deleteTransaction(${t.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
         listEl.appendChild(li);
