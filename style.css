@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg-color: #f4f7fb;
+    --bg-color: #b2c4db;
     --sidebar-bg: #1e293b;
     --sidebar-color: #94a3b8;
     --sidebar-hover: #ffffff;
@@ -11,7 +11,7 @@
     --primary: #3b82f6;
     --success: #10b981;
     --danger: #ef4444;
-    --border: #e2e8f0;
+    --border: #0050b9;
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --radius: 16px;
 }
@@ -116,6 +116,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    
 }
 
 /* Summary Cards */

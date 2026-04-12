@@ -253,7 +253,9 @@ function updateUI() {
         }
     });
 
-    if (creditUsed > CREDIT_LIMIT && !creditAlertShown) {
+    if (creditUsed <= CREDIT_LIMIT) {
+        creditAlertShown = false;
+    } else if (creditUsed > CREDIT_LIMIT && !creditAlertShown) {
         alert("⚠️ Credit limit exceeded!");
         creditAlertShown = true;
     }
